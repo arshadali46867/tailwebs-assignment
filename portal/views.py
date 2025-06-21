@@ -13,6 +13,8 @@ from .models import Student
 from .forms import StudentForm
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.contrib.auth.views import PasswordResetView
+from .forms import CustomPasswordResetForm
 
 def login_view(request):
 
@@ -72,8 +74,8 @@ def add_student(request):
 
         
         if not name or not subject or marks == '':
-            # You can send an error message if needed
-            return redirect('home')  # Or better, show an error page
+            
+            return redirect('home')  
 
         try:
             marks = int(marks) 
@@ -123,12 +125,12 @@ def signup(request):
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
 
-        # Validate required fields
+        
         if not all([first_name, last_name, username, email, password]):
             messages.error(request, "All fields are required!")
             return redirect('signup')
 
-        # Check if username or email already exists
+        
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists!")
             return redirect('signup')
@@ -136,7 +138,6 @@ def signup(request):
             messages.error(request, "Email already registered!")
             return redirect('signup')
 
-        # Create the user
         user = User.objects.create_user(
             username=username,
             password=password,
@@ -151,8 +152,7 @@ def signup(request):
 
 
 
-from django.contrib.auth.views import PasswordResetView
-from .forms import CustomPasswordResetForm
+
 
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
