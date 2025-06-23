@@ -72,24 +72,25 @@ def add_student(request):
         subject = request.POST.get('subject', '').strip()
         marks = request.POST.get('marks', '').strip()
 
-        
-        if not name or not subject or marks == '':
-            
-            return redirect('home')  
+        if not name or not subject or not marks:
+            messages.error(request, "All fields are required!")
+            return redirect('home')
 
         try:
-            marks = int(marks) 
+            marks = int(marks)
         except ValueError:
-            
-            return redirect('home')  
-        student, created = Student.objects.get_or_create(
-            name=name,
-            subject=subject,
-            defaults={'marks': marks}
-        )
-        if not created:
-            student.marks += marks
+            messages.error(request, "Marks must be a number!")
+            return redirect('home')
+
+        
+        try:
+            student = Student.objects.get(name=name, subject=subject)
+            student.marks += marks  
             student.save()
+            messages.success(request, f"Updated {name}'s {subject} marks to {student.marks}.")
+        except Student.DoesNotExist:
+            Student.objects.create(name=name, subject=subject, marks=marks)
+            messages.success(request, f"Added new student {name}.")
 
         return redirect('home')
     return redirect('home')
